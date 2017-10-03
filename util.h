@@ -4,6 +4,7 @@
 
 class JvmtiUtil {
 public:
+    jvmtiError deallocate(jvmtiEnv *jvmti_env, void* block);
     const char* getClassName(JNIEnv* jniEnv, jclass klass);
     const char* getMethodProto(jvmtiEnv *jvmti_env, jmethodID method);
     void  printMethodLocalVarAndValue(jvmtiEnv * jvmti_env, JNIEnv *jni_env, jthread thread, jvmtiFrameInfo *frameInfo, jint depth);

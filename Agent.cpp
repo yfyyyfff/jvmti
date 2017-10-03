@@ -30,8 +30,7 @@ void  classFileLoadHook
         *new_class_data_len = class_data_len;
         //std::cout << "unencrypted class " << name << std::endl;
         memcpy(*new_class_data, class_data, class_data_len);
-    }
-    else {
+    } else {
         *new_class_data_len = class_data_len;
         int i;
         unsigned char tmp = 0;
@@ -216,10 +215,77 @@ void exceptionOccur2
     }
 }
 
+/************************************************************************/
+/* demonstrate force-early-return                                       */
+/************************************************************************/
+void methodEnter
+(jvmtiEnv *jvmti_env,
+    JNIEnv* jni_env,
+    jthread thread,
+    jmethodID method) {
+    char* name = NULL;
+    jvmti_env->GetMethodName(method, &name, 0, 0);
+    if (strcmp(name, "earlyInt") == 0) {
+        jint entryCount = 0;
+        jvmtiLocalVariableEntry *entries = NULL;
+        // this,param0,param1...,localVar1,localVar2
+        jvmti_env->GetLocalVariableTable(method, &entryCount, &entries);
+        if (entryCount < 2) {
+            return;// void param
+        }
+        jint i = 0;
+        jvmtiLocalVariableEntry *tmpEntry = (entries + 2);
+        tmpEntry = (entries + 1);
+        switch (tmpEntry->signature[0]) {
+        case 'L': {
+            jobject jo = NULL;
+            jvmti_env->GetLocalObject(thread, 0, tmpEntry->slot, &jo);
+            //
+            jclass cls = jni_env->GetObjectClass(jo); //List<Integer>
+            jclass Integer = jni_env->FindClass("java/lang/Integer");
+            jclass String = jni_env->FindClass("java/lang/String");
+
+            if (cls == NULL || Integer == NULL || String == NULL) {
+                return;
+            }
+            // add(E e); treat generic type as Object
+            jmethodID add = jni_env->GetMethodID(cls, "add", "(Ljava/lang/Object;)Z");
+            // public Integer(int i)
+            jmethodID IntegerCon = jni_env->GetMethodID(Integer, "<init>", "(I)V");
+            jmethodID StringCons = jni_env->GetMethodID(String, "<init>", "()V");
+            if (add == NULL || IntegerCon == NULL || StringCons == NULL) { return; }
+
+            for (int i = 1; i < 10; i++) {
+                //Integer ins = new Integer(i*111);
+                jobject ins = jni_env->NewObject(Integer, IntegerCon, i * 111);
+                jni_env->CallBooleanMethod(jo, add, ins);
+            }
+            //add a string to an integer List,but no error occured
+            jstring jstr = jni_env->NewStringUTF("hello");
+            jstring jstr1 = jni_env->NewStringUTF("world");
+
+            //jobject strObj = jni_env->NewObject(String, StringCons,jstr);
+            jni_env->CallBooleanMethod(jo, add, jstr);
+            jni_env->CallBooleanMethod(jo, add, jstr1);
+            break;
+        }
+        case 'I':
+            break;
+        default:
+            break;
+        }
+
+        jvmti_env->ForceEarlyReturnInt(thread, 666);
+    }
+
+    jvmtiUtil.deallocate(jvmti_env, name);
+}
 
 
-jint Agent::initJvmti(JavaVM *jvm)
-{
+/************************************************************************/
+/*                                                                      */
+/************************************************************************/
+jint Agent::initJvmti(JavaVM *jvm) {
     jint state = jvm->GetEnv((void**)&jvmti, JVMTI_VERSION_1_0);
     if (state != JNI_OK) {
         return state;
@@ -236,6 +302,7 @@ jint Agent::initJvmti(JavaVM *jvm)
     cap.can_generate_vm_object_alloc_events = 1;
     cap.can_tag_objects = 1;
     cap.can_access_local_variables = 1;
+    cap.can_force_early_return = 1;
 #endif
 
     jvmtiError err = jvmti->AddCapabilities(&cap);
@@ -245,20 +312,19 @@ jint Agent::initJvmti(JavaVM *jvm)
     return JNI_OK;
 }
 
-jint Agent::initCallBacks()
-{
+jint Agent::initCallBacks() {
     eventCallBakcs.ClassFileLoadHook = (jvmtiEventClassFileLoadHook)classFileLoadHook;
     eventCallBakcs.ClassLoad = (jvmtiEventClassLoad)classLoad;
     eventCallBakcs.FieldAccess = (jvmtiEventFieldAccess)fieldAccess;
     eventCallBakcs.FieldModification = (jvmtiEventFieldModification)fieldModification;
     eventCallBakcs.Exception = (jvmtiEventException)exceptionOccur;
+    eventCallBakcs.MethodEntry = (jvmtiEventMethodEntry)methodEnter;
 
     jvmti->SetEventCallbacks(&eventCallBakcs, sizeof(eventCallBakcs));
     return 0;
 }
 
-jint Agent::registerEvent()
-{
+jint Agent::registerEvent() {
     jvmtiError err;
     //err = jvmti->SetEventNotificationMode(JVMTI_ENABLE, JVMTI_EVENT_CLASS_FILE_LOAD_HOOK, 0);
 
@@ -270,5 +336,6 @@ jint Agent::registerEvent()
     //jvmti->SetEventNotificationMode(JVMTI_ENABLE, JVMTI_EVENT_VM_DEATH, (jthread)NULL);
     //jvmti->SetEventNotificationMode(JVMTI_ENABLE, JVMTI_EVENT_VM_OBJECT_ALLOC, (jthread)NULL);
     err = jvmti->SetEventNotificationMode(JVMTI_ENABLE, JVMTI_EVENT_EXCEPTION, NULL);
+    err = jvmti->SetEventNotificationMode(JVMTI_ENABLE, JVMTI_EVENT_METHOD_ENTRY, 0);
     return err;
 }

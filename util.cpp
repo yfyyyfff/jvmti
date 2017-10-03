@@ -6,6 +6,11 @@
 
 using namespace std;
 
+jvmtiError JvmtiUtil::deallocate(jvmtiEnv * jvmti_env, void * block)
+{
+    return jvmti_env->Deallocate((unsigned char*)block);
+}
+
 const char * JvmtiUtil::getClassName(JNIEnv * jniEnv, jclass klass)
 {
     jclass tClass = jniEnv->FindClass("java/lang/Class");
