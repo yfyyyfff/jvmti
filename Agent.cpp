@@ -295,7 +295,6 @@ jint Agent::initJvmti(JavaVM *jvm) {
 #else 
     memset(&cap, 0, sizeof(cap));
     cap.can_signal_thread = 1;
-    cap.can_signal_thread = 1;
     cap.can_get_owned_monitor_info = 1;
     cap.can_generate_method_entry_events = 1;
     cap.can_generate_exception_events = 1;
