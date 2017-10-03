@@ -53,16 +53,29 @@ usemathjax: yes
 ----
 <br>
 <div align="left"><font size=5>
-<p>&emsp;&emsp;一般采用Agent的方式使用JVMTI。Agent中使用 JVMTI 函数，设置一些回调函数，并从 Java 虚拟机中得到当前的运行态信息，作出自己的判断，最后还可能操作虚拟机的运行态。
+<p>&emsp;&emsp;一般采用Agent的方式使用JVMTI。Agent中使用JVMTI函数，设置一些回调函数，并从Java虚拟机中得到当前的运行态信息，作出自己的判断，最后还可能操作虚拟机的运行态。
 
-<p>&emsp;&emsp;把 Agent 编译成一个动态链接库之后，我们可以在 Java 程序启动的时候来加载它(启动加载模式)，也可以使用运行时加载(活动加载模式)。
+<p>&emsp;&emsp;把 Agent 编译成一个动态链接库之后，我们可以在Java程序启动的时候来加载它(启动加载模式)，也可以使用运行时加载(活动加载模式)。
 </font></div>
 ![jvmti](/img/jvmti.jpg)
 
+[slide data-transition="zoomin"]
+## 常见的agent
+* JDWP
+<font size=4>
+<div align=left><p>JDWP是Java Debug Wire Protocol 的缩写，它定义了调试器（debugger）和被调试的 Java 虚拟机（target vm）之间的通信协议。Debugger和 target vm分别在各自的进程中运行，他们之间的通信协议就是JDWP.
+</div></font>
+* instrument
+<font size=4>
+<div align=left><p>instrument为java agent提供基础,主要作用是在ClassFileLoadHook回调函数中设计了一套框架,这套框架支持使用java编写agent。
+</div></font>
 [slide data-transition="cards"]
+## JDWP
 ![jvmti](/img/jdwp.jpg)
 
-
+[slide data-transition="cards"]
+## Java Agent
+![java agent](/img/java_agent.png)
 [slide data-transition="cards"]
 
 ##  使用Agent
@@ -234,9 +247,22 @@ usemathjax: yes
 [slide data-transition="cards"]
 
 ## demo演示
+[slide data-transition="cards"]
+## 运行加密的class文件
 <br>
-1.  运行加密的class文件
+<div align="left">
+<p>加密的class文件无法被jvm加载,需要解密为正确的字节码
+</div>
+
+[slide data-transition="cards"]
+## 实现类似stackparam的功能
 <br>
-2.  实现类似ParamStack的功能
+<div align="left">
+<p>stackparam是一个可以获取调用栈上每个函数参数的工具。现在实现一个当触发异常时,打印调用栈上每个方法局部变量值的功能。
+</div>
+[slide data-transition="cards"]
+## 强制方法提前返回
 <br>
-3.  强制方法提前返回
+* 解决死循环
+* 测试时对该函数打桩
+* 在不修改字节码的情况下修改功能
