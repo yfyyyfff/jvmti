@@ -69,7 +69,7 @@ usemathjax: yes
 </div></font>
 * Instrument
 <font size=4>
-<div align=left><p>Instrument为Java Agent提供基础,主要作用是在ClassFileLoadHook回调函数中设计了一套框架,这套框架支持使用java编写agent。
+<div align=left><p>Instrument为Java Agent提供基础,主要作用是在ClassFileLoadHook回调函数中设计了一套框架,这套框架支持使用java编写agent。JaCoCo(Java Code Coverage)获取覆盖率就是通过java agent进行代码插桩。
 </div></font>
 
 [slide data-transition="cover-circle"]
@@ -136,8 +136,8 @@ usemathjax: yes
 
 编写关注的JVM事件的回调函数
 <pre><code>
-	void  classFileLoadHook
-		(jvmtiEnv *jvmti_env,
+	void classFileLoadHook (
+		jvmtiEnv *jvmti_env,
 	    JNIEnv* jni_env,
 	    jclass class_being_redefined,
 	    jobject loader,
@@ -146,19 +146,20 @@ usemathjax: yes
 	    jint class_data_len,
 	    const unsigned char* class_data,
 	    jint* new_class_data_len,
-	    unsigned char** new_class_data) {
-	    jvmti_env->Allocate(class_data_len, new_class_data);
-	    *new_class_data_len = class_data_len;
-	    if (strcmp(name, "encrypt/TestClass") != 0) {
-	        memcpy(*new_class_data, class_data, class_data_len);
-	    } else {
-	        int i;unsigned char tmp = 0;
-	        for (i = 0; i < class_data_len; i++) {
-	            tmp = (class_data[i]);
-	            (*new_class_data)[i] = (unsigned char)(~tmp);
-	        }
-    	}
-	}
+	    unsigned char** new_class_data) 
+	    {
+		    jvmti_env->Allocate(class_data_len, new_class_data);
+		    *new_class_data_len = class_data_len;
+		    if (strcmp(name, "encrypt/TestClass") != 0) {
+		        memcpy(*new_class_data, class_data, class_data_len);
+		    } else {
+		        int i;unsigned char tmp = 0;
+		        for (i = 0; i < class_data_len; i++) {
+		            tmp = (class_data[i]);
+		            (*new_class_data)[i] = (unsigned char)(~tmp);
+		        }
+	    	}
+		}
 </code></pre>
 =====
 
