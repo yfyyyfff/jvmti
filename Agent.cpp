@@ -26,7 +26,7 @@ void  classFileLoadHook
     unsigned char** new_class_data) {
     //*new_class_data = (unsigned char*)malloc(sizeof(unsigned char)*class_data_len);
     jvmti_env->Allocate(class_data_len, new_class_data);
-    if (strcmp(name, "encrypt/TestClass") != 0) {
+    if (strcmp(name, "jvmti/Encryptee") != 0) {
         *new_class_data_len = class_data_len;
         //std::cout << "unencrypted class " << name << std::endl;
         memcpy(*new_class_data, class_data, class_data_len);
@@ -325,7 +325,7 @@ jint Agent::initCallBacks() {
 
 jint Agent::registerEvent() {
     jvmtiError err;
-    //err = jvmti->SetEventNotificationMode(JVMTI_ENABLE, JVMTI_EVENT_CLASS_FILE_LOAD_HOOK, 0);
+    err = jvmti->SetEventNotificationMode(JVMTI_ENABLE, JVMTI_EVENT_CLASS_FILE_LOAD_HOOK, 0);
 
     //jvmti->SetEventNotificationMode(JVMTI_ENABLE, JVMTI_EVENT_CLASS_LOAD, 0);
     //jvmti->SetEventNotificationMode(JVMTI_ENABLE, JVMTI_EVENT_FIELD_ACCESS, 0);
