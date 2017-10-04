@@ -289,7 +289,7 @@ jint Agent::initJvmti(JavaVM *jvm) {
     jint state = jvm->GetEnv((void**)&jvmti, JVMTI_VERSION_1_0);
     if (state != JNI_OK) {
         return state;
-    }
+}
 #if 0
     memset(&cap, 1, sizeof(cap));
 #else 
@@ -309,7 +309,7 @@ jint Agent::initJvmti(JavaVM *jvm) {
         return JNI_ERR;
     }
     return JNI_OK;
-}
+    }
 
 jint Agent::initCallBacks() {
     eventCallBakcs.ClassFileLoadHook = (jvmtiEventClassFileLoadHook)classFileLoadHook;

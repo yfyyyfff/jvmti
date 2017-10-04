@@ -21,7 +21,7 @@ usemathjax: yes
 2. Agent简介
 3. JNI基础
 4. 运行加密的class文件
-5. 实现类似ParamStack的功能
+5. 实现类似StackParam的功能
 6. 强制方法提前返回
 
 [slide data-transition="stick"]
@@ -53,27 +53,30 @@ usemathjax: yes
 ----
 <br>
 <div align="left"><font size=5>
-<p>&emsp;&emsp;一般采用Agent的方式使用JVMTI。Agent中使用JVMTI函数，设置一些回调函数，并从Java虚拟机中得到当前的运行态信息，作出自己的判断，最后还可能操作虚拟机的运行态。
+<p>&emsp;&emsp;一般采用Agent的方式使用JVMTI。Agent中使用JVMTI函数，设置注册事件和回调函数，并从Java虚拟机中得到当前的运行态信息，作出自己的判断，最后还可能操作虚拟机的运行态。
 
 <p>&emsp;&emsp;把 Agent 编译成一个动态链接库之后，我们可以在Java程序启动的时候来加载它(启动加载模式)，也可以使用运行时加载(活动加载模式)。
 </font></div>
 ![jvmti](/img/jvmti.jpg)
 
 [slide data-transition="zoomin"]
+
 ## 常见的agent
+
 * JDWP
 <font size=4>
 <div align=left><p>JDWP是Java Debug Wire Protocol 的缩写，它定义了调试器（debugger）和被调试的 Java 虚拟机（target vm）之间的通信协议。Debugger和 target vm分别在各自的进程中运行，他们之间的通信协议就是JDWP.
 </div></font>
-* instrument
+* Instrument
 <font size=4>
-<div align=left><p>instrument为java agent提供基础,主要作用是在ClassFileLoadHook回调函数中设计了一套框架,这套框架支持使用java编写agent。
+<div align=left><p>Instrument为Java Agent提供基础,主要作用是在ClassFileLoadHook回调函数中设计了一套框架,这套框架支持使用java编写agent。
 </div></font>
-[slide data-transition="cards"]
+
+[slide data-transition="cover-circle"]
 ## JDWP
 ![jvmti](/img/jdwp.jpg)
 
-[slide data-transition="cards"]
+[slide data-transition="cover-diamond"]
 ## Java Agent
 ![java agent](/img/java_agent.png)
 [slide data-transition="cards"]
@@ -172,7 +175,7 @@ usemathjax: yes
 </code></pre>
 [/subslide]
 
-[slide data-transition="cards"]
+[slide data-transition="vertical3d"]
 
 ## JNI基础
 *  JNI(Java Native Interface)是Java和本地语言(C/C++等)交互的接口。通过该接口，Java和本地语言可以相互调用。通过JNI可以使用本地语言实现系统底层的功能供Java使用，如Thread类和Unsafe类。
@@ -180,7 +183,34 @@ usemathjax: yes
 *  JNI提供的函数在jni.h中声明。
 *  JNI另一要素是Signature(签名)，类，方法和成员都有签名。签名表示了一个元素的结构和特性。因为重载和泛型机制，仅依赖名字无法分辨2个元素是否同一个，如StringBuffer的多个append方法和List的泛型。
 
-[slide data-transition="cards"]
+[slide data-transition="vertical3d"]
+## Native方法
+<div align=left><font size=4>
+<p>&emsp;&emsp;JNI实现的方法都是native修饰的,这些方法没有方法体;含有native方法的类要静态地加载对应的动态库。
+</font></div>
+<pre><code>
+	//Thread类
+	public class Thread implements Runnable {
+	    /* Make sure registerNatives is the first thing <clinit> does. */
+	    private static native void registerNatives();
+	    static {
+	        registerNatives(); //灵活,效率高,动态更新
+	    }
+	    private native boolean isInterrupted(boolean ClearInterrupted);
+	    public final native boolean isAlive();
+	    //...
+    }
+    //Instrument框架的实现
+    public class InstrumentationImpl implements Instrumentation {
+    	@SuppressWarnings("rawtypes")
+	    private native Class[] getInitiatedClasses0(long nativeAgent, ClassLoader loader);
+	    static {
+        	System.loadLibrary("instrument");
+    	}
+    	//...
+    }
+</code></pre>
+[slide data-transition="circle"]
 ## Signature
 <div align="left"><font size=4>在java home下include文件夹下可以找到classfile_constants.h,里面定义了一些常量,Signature部分如下:</font></div>
 <pre><code>
@@ -204,7 +234,7 @@ usemathjax: yes
 	};
 </code></pre>
 
-[slide data-transition="cards"]
+[slide data-transition="horizontal3d"]
 ## 签名示例
 <table >
   <tr>
@@ -245,24 +275,43 @@ usemathjax: yes
 </table>
 
 [slide data-transition="cards"]
+## JNI调用Java示例
+<pre><code>
+	// Integer v1 = 55;
+	// Integer v2 = 55;
+	// v1 == v2 ?
+	jclass Integer = jni_env->FindClass("java/lang/Integer");
+    jmethodID valueOf = jni_env->GetStaticMethodID(Integer, "valueOf", "(I)Ljava/lang/Integer;");
+    jobject iv1 = jni_env->CallStaticObjectMethod(Integer, valueOf, 55);
+    jobject iv2 = jni_env->CallStaticObjectMethod(Integer, valueOf, 55);	
+	if(iv1 == iv2){ //java和jni结果不一样,可能是个bug
+		//same objects
+	}else{
+		//different objects
+	}
+</code></pre>
+
+[slide data-transition="cards"]
 
 ## demo演示
-[slide data-transition="cards"]
+[slide data-transition="slide"]
 ## 运行加密的class文件
 <br>
 <div align="left">
 <p>加密的class文件无法被jvm加载,需要解密为正确的字节码
 </div>
 
-[slide data-transition="cards"]
+[slide data-transition="slide3"]
 ## 实现类似stackparam的功能
 <br>
 <div align="left">
 <p>stackparam是一个可以获取调用栈上每个函数参数的工具。现在实现一个当触发异常时,打印调用栈上每个方法局部变量值的功能。
 </div>
-[slide data-transition="cards"]
+[slide data-transition="slide2"]
 ## 强制方法提前返回
 <br>
-* 解决死循环
 * 测试时对该函数打桩
 * 在不修改字节码的情况下修改功能
+* 破解验证
+* 解决死循环
+* ...

@@ -95,6 +95,5 @@ const char* JvmtiUtil::toString(JNIEnv * jni_env, jobject jo)
     jmethodID toStringMethod = jni_env->GetMethodID(clz, "toString", "()Ljava/lang/String;");
     jstring str = (jstring)jni_env->CallObjectMethod(jo, toStringMethod);
     const char* s = jni_env->GetStringUTFChars(str, 0);
-    //how to free str
     return s;
 }
