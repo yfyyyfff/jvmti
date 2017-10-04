@@ -302,10 +302,10 @@ usemathjax: yes
 </div>
 
 [slide data-transition="slide3"]
-## 实现类似stackparam的功能
+## 实现类似StackParam的功能
 <br>
 <div align="left">
-<p>stackparam是一个可以获取调用栈上每个函数参数的工具。现在实现一个当触发异常时,打印调用栈上每个方法局部变量值的功能。
+<p>StackParam是一个可以获取调用栈上每个函数参数的工具。现在实现一个当触发异常时,打印调用栈上每个方法局部变量值的功能。
 </div>
 [slide data-transition="slide2"]
 ## 强制方法提前返回
@@ -315,3 +315,7 @@ usemathjax: yes
 * 破解验证
 * 解决死循环
 * ...
+
+[slide data-transition="slide2"]
+# 结束
+## 谢谢观看

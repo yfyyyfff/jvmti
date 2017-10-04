@@ -17,16 +17,16 @@ public class EarlyReturn {
 			e.printStackTrace();
 		}
 		System.out.println(return1.list);
-		System.out.println("EarlyReturn.main end, r=" + r);
+		System.out.println("r=" + r);
+		System.out.println("EarlyReturn.main end");
 
 	}
 
 	int earlyInt(List<Integer> list) throws InterruptedException {
 		int i = 0;
-		String string = "ababa";
-		for (; i < 30; i++) {
+		for (; i < 10; i++) {
 			list.add(i);
-			Thread.sleep(100);
+			Thread.sleep(300);
 		}
 		return i;
 	}
