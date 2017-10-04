@@ -243,13 +243,12 @@ void methodEnter
             //
             jclass cls = jni_env->GetObjectClass(jo); //List<Integer>
             jclass Integer = jni_env->FindClass("java/lang/Integer");
-            /**
+            
             jmethodID valueOf = jni_env->GetStaticMethodID(Integer, "valueOf", "(I)Ljava/lang/Integer;");
             jint intV = 55;
             jobject v1= jni_env->CallStaticObjectMethod(Integer, valueOf, intV);
             jobject v2 = jni_env->CallStaticObjectMethod(Integer, valueOf, intV);
-            **/
-            
+              
             jclass String = jni_env->FindClass("java/lang/String");
 
             if (cls == NULL || Integer == NULL || String == NULL) {
