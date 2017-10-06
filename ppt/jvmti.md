@@ -37,14 +37,14 @@ usemathjax: yes
 
 [slide data-transition="zoomout"]
 ## JVMTI基本功能
-* 管理内存 (非JVM管理的内存)
+* 管理内存 (非JVM管理的内存) {:&.rollIn}
+* 管理堆
 * 获取线程和线程组信息
 * 提前返回 Force Early Return
 * 获取线程的栈帧信息
-* 管理堆
 * 管理局部变量(栈)
-* 管理断点
 * 管理类、对象、成员和方法
+* 管理断点
 * 管理JVM事件
 * ...
 

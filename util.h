@@ -10,4 +10,5 @@ public:
     void  printMethodLocalVarAndValue(jvmtiEnv * jvmti_env, JNIEnv *jni_env, jthread thread, jvmtiFrameInfo *frameInfo, jint depth);
 
     const char* toString(JNIEnv *jni_env, jobject jo);
+    const char* array2String(JNIEnv *jni_env, jarray array);
 };

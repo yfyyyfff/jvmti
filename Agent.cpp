@@ -137,7 +137,7 @@ void exceptionOccur
     char* curMethodName = NULL;
     jclass exceptionCls = jni_env->GetObjectClass(exception);
     const char* xName = jvmtiUtil.getClassName(jni_env, exceptionCls);
-    if (strcmp(xName, "jvmti.ExceptionForTest") != 0) {
+    if (strcmp(xName, "jvmti.StackParamException") != 0) {
         return;
     }
 
