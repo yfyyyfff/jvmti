@@ -86,8 +86,8 @@ usemathjax: yes
 <br>
 * 启动加载
 <div align="left"><font face="consolas" color=#FFF0F5>
-<p>java -agentpath:path/to/agent<font color=00FF00>=&lt;options&gt;</font> package/Class
-<p>java -agentlib:agent<font color=00FF00>=&lt;options&gt;</font> package/Class</font></div>
+<p>java -agentpath:path/to/agent<font color=00FF00><em>=&lt;options&gt;</em></font> package/Class
+<p>java -agentlib:agent<font color=00FF00><em>=&lt;options&gt;</em></font> package/Class</font></div>
 * 活动加载
 <pre><code>
 	//jvmPID为Java虚拟机进程
@@ -239,36 +239,43 @@ usemathjax: yes
 ## 签名示例
 <table >
   <tr>
-    <th width=400>元素</th>
-    <th width=240>名称</th>
-    <th width=750>签名</th>
+    <th width=60 align="center">编号</th>
+    <th width=450>元素</th>
+    <th width=200>名称</th>
+    <th width=700>签名</th>
   </tr>
   <tr>
+  	<td align="center">1</td>
     <td>public Integer(int i);</td>
     <td>&lt;init&gt;</td>
     <td>(I)V</td>
   </tr>
   <tr>
+  	<td align="center">2</td>
     <td>public String(char[] value)</td>
     <td>&lt;init&gt;</td>
     <td>([C)V</td>
   </tr>
   <tr>
+  	<td align="center">3</td>
     <td>Object.equals(Object o);</td>
     <td>equals</td>
     <td>(Ljava/lang/Object;)Z</td>
   </tr>
   <tr>
+  	<td align="center">4</td>
     <td>List&lt;Integer&gt; myList;</td>
     <td>myList</td>
     <td>签名Ljava/util/List;<br>泛型签名Ljava/util/List&lt;Ljava/lang/Integer;&gt;;</td>
   </tr>
   <tr>
+  	<td align="center">5</td>
     <td>StringBuffer.append(int i);</td>
     <td>append</td>
     <td>(I)Ljava/lang/StringBuffer;</td>
   </tr>
   <tr>
+  	<td align="center">6</td>
     <td>StringBuffer.replace(int start,int end,String s);</td>
     <td>replace</td>
     <td>(IILjava/lang/String;)Ljava/lang/StringBuffer;</td>
@@ -278,18 +285,18 @@ usemathjax: yes
 [slide data-transition="cards"]
 ## JNI调用Java示例
 <pre><code>
-	// Integer v1 = 55;
-	// Integer v2 = 55;
-	// v1 == v2 ?
-	jclass Integer = jni_env->FindClass("java/lang/Integer");
+    // Integer v1 = 55;
+    // Integer v2 = 55;
+    // v1 == v2 ?
+    jclass Integer = jni_env->FindClass("java/lang/Integer");
     jmethodID valueOf = jni_env->GetStaticMethodID(Integer, "valueOf", "(I)Ljava/lang/Integer;");
     jobject iv1 = jni_env->CallStaticObjectMethod(Integer, valueOf, 55);
     jobject iv2 = jni_env->CallStaticObjectMethod(Integer, valueOf, 55);	
-	if(iv1 == iv2){ //java和jni结果不一样,可能是个bug
-		//same objects
-	}else{
-		//different objects
-	}
+    if(iv1 == iv2){ 
+        //same objects
+    }else{
+        //different objects
+    }
 </code></pre>
 
 [slide data-transition="cards"]
@@ -297,10 +304,7 @@ usemathjax: yes
 ## demo演示
 [slide data-transition="slide"]
 ## 运行加密的class文件
-<br>
-<div align="left">
-<p>加密的class文件无法被jvm加载,需要解密为正确的字节码
-</div>
+![compile_and_load](/img/JavaArchitecture3.jpg)
 
 [slide data-transition="slide3"]
 ## 实现类似StackParam的功能
@@ -308,6 +312,28 @@ usemathjax: yes
 <div align="left">
 <p>StackParam是一个可以获取调用栈上每个函数参数的工具。现在实现一个当触发异常时,打印调用栈上每个方法局部变量值的功能。
 </div>
+
+[slide data-transition="vertical3d"]
+<pre><code>
+public class HelloFailure {
+    public static void main(String[] args) {
+        throwException(42);
+    }
+
+    public static void throwException(int foo) {
+        throw new RuntimeException("Hello, Failure!");
+    }
+}
+</code></pre>
+
+<pre><code>
+执行java -agentpath:path/to/shared.ext HelloFailure --some-arg --another-arg 10
+运行结果
+Exception in thread "main" java.lang.RuntimeException: Hello, Failure!
+        at HelloFailure.throwException(HelloFailure.java:0) [foo=42]
+        at HelloFailure.main(HelloFailure.java:0) [args=[--some-arg, --another-arg, 10]]
+
+</code></pre>
 [slide data-transition="slide2"]
 ## 强制方法提前返回
 <br>

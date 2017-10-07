@@ -69,11 +69,15 @@ void JvmtiUtil::printMethodLocalVarAndValue(jvmtiEnv * jvmti_env, JNIEnv *jni_en
             cout << "\t" << tmpEntry->name << "=" << v << endl;
         } else if (sigChar == 'L' || sigChar == '[') {
             jobject jo = NULL;
+            jclass ToStringUtil = jni_env->FindClass("jvmti/ToStringUtil");
+            jmethodID array2String = jni_env->GetStaticMethodID(ToStringUtil, "array2String", "(Ljava/lang/Object;)Ljava/lang/String;");
             jvmti_env->GetLocalObject(thread, depth, tmpEntry->slot, &jo);
             if (jo == NULL) {
                 cout << "\t" << tmpEntry->name << "=" << "null" << endl;
             } else {
-                cout << "\t" << tmpEntry->name << "=" << toString(jni_env, jo) << endl;
+                jstring str = (jstring)jni_env->CallStaticObjectMethodA(ToStringUtil, array2String, (const jvalue*)&jo);
+                const char* cstrs = jni_env->GetStringUTFChars(str, 0);
+                cout << "\t" << tmpEntry->name << "=" << cstrs << endl;
             }
         } else {
             cout << "\t" << tmpEntry->name << "=暂不支持的类型" << endl;
@@ -90,10 +94,6 @@ const char* JvmtiUtil::toString(JNIEnv * jni_env, jobject jo) {
     return s;
 }
 
-const char * JvmtiUtil::array2String(JNIEnv * jni_env, jarray array) {
-    jsize size = jni_env->GetArrayLength(array);
-
-}
 
 
 
